@@ -108,7 +108,6 @@ export async function renderFrame(options, outfitPack, mountPack) {
 		);
 
 		if (mountTemplate) {
-			console.log("Colorizing mount", mounthead, mountbody, mountlegs, mountfeet);
 			colorize(mountTemplate, mountImg, mounthead, mountbody, mountlegs, mountfeet);
 		}
 
