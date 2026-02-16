@@ -54,15 +54,15 @@ The Worker fetches and parses the TAR file, minimizing network overhead.
 
 Param         Description
   ------------- ---------------------
-`head`        Head color (0--255)
-`body`        Body color (0--255)
-`legs`        Legs color (0--255)
-`feet`        Feet color (0--255)
-`addons`      0--3
-`mount`       Mount ID
-`direction`   1--4
-`animation`   Frame index (for static images)
-`rotate`      0 or 1
+`head`        Head color (0--255)  
+`body`        Body color (0--255)  
+`legs`        Legs color (0--255)  
+`feet`        Feet color (0--255)  
+`addons`      0--3  
+`mount`       Mount ID  
+`direction`   1--4  
+`animation`   Frame index (for static images)  
+`rotate`      0 or 1  
 
 ------------------------------------------------------------------------
 
