@@ -53,6 +53,10 @@ export async function renderFrame(options, outfitPack, mountPack) {
 		body = 0,
 		legs = 0,
 		feet = 0,
+		mounthead = 0,
+		mountbody = 0,
+		mountlegs = 0,
+		mountfeet = 0,
 		mount = 0,
 		direction = 3,
 		animation = 1,
@@ -94,10 +98,19 @@ export async function renderFrame(options, outfitPack, mountPack) {
 
 	// Mount overlay
 	if (mountState === 2) {
+		const mountTemplate = await loadPNGFromTar(
+			mountPack,
+			`${animation}_1_1_${direction}_template.png`
+		);
 		const mountImg = await loadPNGFromTar(
 			mountPack,
 			`${animation}_1_1_${direction}.png`
 		);
+
+		if (mountTemplate) {
+			console.log("Colorizing mount", mounthead, mountbody, mountlegs, mountfeet);
+			colorize(mountTemplate, mountImg, mounthead, mountbody, mountlegs, mountfeet);
+		}
 
 		if (mountImg) {
 			alphaOverlay(mountImg, base);

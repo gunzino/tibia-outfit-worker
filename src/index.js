@@ -42,13 +42,17 @@ function buildCacheKey(request, params) {
 	const url = new URL(request.url);
 
 	const keyString = [
-		"v1", // renderer version (bump when logic changes)
+		"v2", // renderer version (bump when logic changes)
 		params.id,
 		params.addons,
 		params.head,
 		params.body,
 		params.legs,
 		params.feet,
+		params.mounthead,
+		params.mountbody,
+		params.mountlegs,
+		params.mountfeet,
 		params.mount,
 		params.direction,
 		params.animation,

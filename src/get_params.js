@@ -16,6 +16,11 @@ export function getParams(url) {
 	const legs = clamp(parseIntSafe(url.searchParams.get("legs"), 0), 0, 255)
 	const feet = clamp(parseIntSafe(url.searchParams.get("feet"), 0), 0, 255)
 
+	const mounthead = clamp(parseIntSafe(url.searchParams.get("mounthead"), 0), 0, 255)
+	const mountbody = clamp(parseIntSafe(url.searchParams.get("mountbody"), 0), 0, 255)
+	const mountlegs = clamp(parseIntSafe(url.searchParams.get("mountlegs"), 0), 0, 255)
+	const mountfeet = clamp(parseIntSafe(url.searchParams.get("mountfeet"), 0), 0, 255)
+
 	const mount = parseIntSafe(url.searchParams.get("mount"), 0)
 	const direction = clamp(parseIntSafe(url.searchParams.get("direction"), 3), 1, 4)
 	const animation = parseIntSafe(url.searchParams.get("animation"), 1)
@@ -39,6 +44,10 @@ export function getParams(url) {
 		body: body,
 		legs: legs,
 		feet: feet,
+		mounthead: mounthead,
+		mountbody: mountbody,
+		mountlegs: mountlegs,
+		mountfeet: mountfeet,
 		mount: mount,
 		direction: direction,
 		animation: animation,
