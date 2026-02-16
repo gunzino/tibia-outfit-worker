@@ -12,6 +12,7 @@ Optimized for edge performance.
 ## 🚀 Features
 
 -   🎨 Colorized outfits (head, body, legs, feet)
+-   🎨 Colorized Mounts (head, body, legs, feet)
 -   🧩 Addon support (1--3)
 -   🐎 Mount support
 -   🔁 Static and animated rendering
@@ -58,6 +59,10 @@ Param         Description
 `body`        Body color (0--255)  
 `legs`        Legs color (0--255)  
 `feet`        Feet color (0--255)  
+`mounthead`   Mount Head color (0--255)  
+`mountbody`   Mount Body color (0--255)  
+`mountlegs`   Mount Legs color (0--255)  
+`mountfeet`   Mount Feet color (0--255)  
 `addons`      0--3  
 `mount`       Mount ID  
 `direction`   1--4  
