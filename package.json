@@ -1,7 +1,7 @@
 {
 	"name": "outfit-worker",
-	"version": "0.0.0",
-	"private": true,
+	"version": "1.0.0",
+	"private": false,
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
@@ -12,5 +12,9 @@
 		"@cloudflare/vitest-pool-workers": "^0.12.4",
 		"vitest": "~3.2.0",
 		"wrangler": "^4.65.0"
+	},
+	"dependencies": {
+		"@cf-wasm/png": "^0.3.2",
+		"gifski-wasm": "^2.2.0"
 	}
 }

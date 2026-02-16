@@ -150,6 +150,9 @@ dist
 
 .vscode-test
 
+# JetBrains
+.idea
+
 # yarn v2
 
 .yarn/cache
