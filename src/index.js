@@ -42,7 +42,7 @@ function buildCacheKey(request, params) {
 	const url = new URL(request.url);
 
 	const keyString = [
-		"v2", // renderer version (bump when logic changes)
+		"v3", // renderer version (bump when logic changes)
 		params.id,
 		params.addons,
 		params.head,
@@ -99,7 +99,7 @@ export default {
 	async fetch(request, env, ctx) {
 		const url = new URL(request.url);
 
-		if (!isAllowedReferer(request)) {
+		if (!isAllowedReferer(request, env)) {
 			return new Response("Alien detected", { status: 400 })
 		}
 

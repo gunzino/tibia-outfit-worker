@@ -31,15 +31,15 @@ const LOOKUP = [
 ];
 
 const SPEEDS = {
-	1: 50,
-	2: 35,
-	3: 30,
-	4: 15,
-	5: 15,
-	6: 15,
-	7: 15,
-	8: 8,
-	9: 8
+	1: 500,
+	2: 350,
+	3: 300,
+	4: 150,
+	5: 150,
+	6: 150,
+	7: 150,
+	8: 80,
+	9: 80
 };
 
 // =====================================================
@@ -143,6 +143,7 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 	let width = 32;
 	let height = 32;
 	const framePromises = [];
+	const frameDurations = [];
 	if (options.rotate) {
 		for (let d = 1; d <= 4; d++) {
 			for (let f = 1; f <= outfitMetadata.frameCount; f++) {
@@ -151,6 +152,7 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 					direction: d,
 					animation: f,
 				}, outfitPack, mountPack));
+				frameDurations.push(SPEEDS[outfitMetadata.frameCount]);
 			}
 		}
 	} else {
@@ -159,6 +161,7 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 				...options,
 				animation: f,
 			}, outfitPack, mountPack));
+			frameDurations.push(SPEEDS[outfitMetadata.frameCount]);
 		}
 	}
 
@@ -169,11 +172,9 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 		frames.push(frame.image)
 	}
 
-	const delay = SPEEDS[outfitMetadata.frameCount];
-	const fps = Math.round(1000 / delay / 10);
 	const gif = await encodeGIF({
 		frames,
-		fps: fps,
+		frameDurations: frameDurations,
 		width: width,
 		height: height,
 	});
