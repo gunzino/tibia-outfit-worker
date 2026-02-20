@@ -42,8 +42,9 @@ function buildCacheKey(request, params) {
 	const url = new URL(request.url);
 
 	const keyString = [
-		"v3", // renderer version (bump when logic changes)
+		"v4", // renderer version (bump when logic changes)
 		params.id,
+		params.walk,
 		params.addons,
 		params.head,
 		params.body,

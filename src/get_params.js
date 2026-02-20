@@ -25,6 +25,7 @@ export function getParams(url) {
 	const direction = clamp(parseIntSafe(url.searchParams.get("direction"), 3), 1, 4)
 	const animation = parseIntSafe(url.searchParams.get("animation"), 1)
 	const rotate = parseIntSafe(url.searchParams.get("rotate"), 0)
+	const walk = clamp(parseIntSafe(url.searchParams.get("walk"), 1), 0, 1)
 
 	const pathname = url.pathname.toLowerCase();
 
@@ -52,7 +53,8 @@ export function getParams(url) {
 		direction: direction,
 		animation: animation,
 		rotate: rotate,
-		animate: animate
+		animate: animate,
+		walk: walk
 	}
 }
 

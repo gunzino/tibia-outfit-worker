@@ -60,6 +60,7 @@ export async function renderFrame(options, outfitPack, mountPack) {
 		mount = 0,
 		direction = 3,
 		animation = 1,
+		walk = 1,
 	} = options;
 
 	const mountId = mount & 0xffff;
@@ -67,19 +68,19 @@ export async function renderFrame(options, outfitPack, mountPack) {
 
 	const base = await loadPNGFromTar(
 		outfitPack,
-		`${animation}_${mountState}_1_${direction}.png`
+		`${walk}_${animation}_${mountState}_1_${direction}.png`
 	);
 
 	if (!base) {
 		throw new Error(
-			`Outfit base image not found: ${animation}_${mountState}_1_${direction}.png`
+			`Outfit base image not found: ${walk}_${animation}_${mountState}_1_${direction}.png`
 		);
 	}
 
 	// TEMPLATE OPTIONAL
 	const template = await loadPNGFromTar(
 		outfitPack,
-		`${animation}_${mountState}_1_${direction}_template.png`
+		`${walk}_${animation}_${mountState}_1_${direction}_template.png`
 	);
 
 	// Apply addons
@@ -100,11 +101,11 @@ export async function renderFrame(options, outfitPack, mountPack) {
 	if (mountState === 2) {
 		const mountTemplate = await loadPNGFromTar(
 			mountPack,
-			`${animation}_1_1_${direction}_template.png`
+			`${walk}_${animation}_1_1_${direction}_template.png`
 		);
 		const mountImg = await loadPNGFromTar(
 			mountPack,
-			`${animation}_1_1_${direction}.png`
+			`${walk}_${animation}_1_1_${direction}.png`
 		);
 
 		if (mountTemplate) {
@@ -117,7 +118,7 @@ export async function renderFrame(options, outfitPack, mountPack) {
 		} else {
 			console.log(
 				"Cannot find mount image",
-				`${animation}_1_1_${direction}.png`
+				`${walk}_${animation}_1_1_${direction}.png`
 			);
 		}
 	}
@@ -126,14 +127,13 @@ export async function renderFrame(options, outfitPack, mountPack) {
 }
 
 export async function createColorizedOutfit(options, outfitPack, mountPack) {
+	options.walk = 0;
 	const image = await renderFrame(options, outfitPack, mountPack);
 	return encodePNG(image);
 }
 
 export async function createAnimatedGIF(options, outfitPack, mountPack) {
-
 	const outfitMetadata = await loadMetadataFromTar(outfitPack);
-
 	if (!outfitMetadata) {
 		throw new Error("Specific outfit dos not have metadata")
 	}
@@ -146,22 +146,22 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 	const frameDurations = [];
 	if (options.rotate) {
 		for (let d = 1; d <= 4; d++) {
-			for (let f = 1; f <= outfitMetadata.frameCount; f++) {
+			for (let f = 1; f <= outfitMetadata.frameCounts[options.walk]; f++) {
 				framePromises.push(renderFrame({
 					...options,
 					direction: d,
 					animation: f,
 				}, outfitPack, mountPack));
-				frameDurations.push(SPEEDS[outfitMetadata.frameCount]);
+				frameDurations.push(SPEEDS[outfitMetadata.frameCounts[options.walk]]);
 			}
 		}
 	} else {
-		for (let f = 1; f <= outfitMetadata.frameCount; f++) {
+		for (let f = 1; f <= outfitMetadata.frameCounts[options.walk]; f++) {
 			framePromises.push(renderFrame({
 				...options,
 				animation: f,
 			}, outfitPack, mountPack));
-			frameDurations.push(SPEEDS[outfitMetadata.frameCount]);
+			frameDurations.push(SPEEDS[outfitMetadata.frameCounts[options.walk]]);
 		}
 	}
 
