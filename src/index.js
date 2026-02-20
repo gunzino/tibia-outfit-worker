@@ -38,9 +38,7 @@ async function getTarPack(env, id) {
 	return parsed;
 }
 
-function buildCacheKey(request, params) {
-	const url = new URL(request.url);
-
+function buildCacheKey(url, request, params) {
 	const keyString = [
 		"v4", // renderer version (bump when logic changes)
 		params.id,
@@ -110,7 +108,7 @@ export default {
 		}
 
 		const cache = caches.default;
-		const cacheKey = buildCacheKey(request, params);
+		const cacheKey = buildCacheKey(url, request, params);
 
 		const cached = await cache.match(cacheKey);
 		if (cached) {
@@ -159,6 +157,6 @@ export default {
 			return response;
 		}
 
-		return new Response('Somthing strange happened', { status: 400 });
+		return new Response('Something strange happened', { status: 400 });
 	},
 };

@@ -99,16 +99,12 @@ export async function renderFrame(options, outfitPack, mountPack) {
 
 	// Mount overlay
 	if (mountState === 2) {
-		const mountTemplate = await loadPNGFromTar(
-			mountPack,
-			`${walk}_${animation}_1_1_${direction}_template.png`
-		);
-		const mountImg = await loadPNGFromTar(
-			mountPack,
-			`${walk}_${animation}_1_1_${direction}.png`
-		);
+		const [mountTemplate, mountImg] = await Promise.all([
+			loadPNGFromTar(mountPack, `${walk}_${animation}_1_1_${direction}_template.png`),
+			loadPNGFromTar(mountPack, `${walk}_${animation}_1_1_${direction}.png`),
+		]);
 
-		if (mountTemplate) {
+		if (mountTemplate && mountImg) {
 			colorize(mountTemplate, mountImg, mounthead, mountbody, mountlegs, mountfeet);
 		}
 
@@ -135,55 +131,47 @@ export async function createColorizedOutfit(options, outfitPack, mountPack) {
 export async function createAnimatedGIF(options, outfitPack, mountPack) {
 	const outfitMetadata = await loadMetadataFromTar(outfitPack);
 	if (!outfitMetadata) {
-		throw new Error("Specific outfit dos not have metadata")
+		throw new Error("Specific outfit does not have metadata")
 	}
 
-	let frames = [];
-
-	let width = 32;
-	let height = 32;
+	const frameCount = outfitMetadata.frameCounts[options.walk];
+	const frameDuration = SPEEDS[frameCount];
 	const framePromises = [];
 	const frameDurations = [];
+
 	if (options.rotate) {
 		for (let d = 1; d <= 4; d++) {
-			for (let f = 1; f <= outfitMetadata.frameCounts[options.walk]; f++) {
-				framePromises.push(renderFrame({
-					...options,
-					direction: d,
-					animation: f,
-				}, outfitPack, mountPack));
-				frameDurations.push(SPEEDS[outfitMetadata.frameCounts[options.walk]]);
+			for (let f = 1; f <= frameCount; f++) {
+				options.direction = d;
+				options.animation = f;
+				framePromises.push(renderFrame(options, outfitPack, mountPack));
+				frameDurations.push(frameDuration);
 			}
 		}
 	} else {
-		for (let f = 1; f <= outfitMetadata.frameCounts[options.walk]; f++) {
-			framePromises.push(renderFrame({
-				...options,
-				animation: f,
-			}, outfitPack, mountPack));
-			frameDurations.push(SPEEDS[outfitMetadata.frameCounts[options.walk]]);
+		for (let f = 1; f <= frameCount; f++) {
+			options.animation = f;
+			framePromises.push(renderFrame(options, outfitPack, mountPack));
+			frameDurations.push(frameDuration);
 		}
 	}
 
 	const resolvedFrames = await Promise.all(framePromises);
-	for (let frame of resolvedFrames) {
-		width = frame.width;
-		height = frame.height;
-		frames.push(frame.image)
+	const frames = new Array(resolvedFrames.length);
+	let width = 32;
+	let height = 32;
+	for (let i = 0; i < resolvedFrames.length; i++) {
+		width = resolvedFrames[i].width;
+		height = resolvedFrames[i].height;
+		frames[i] = resolvedFrames[i].image;
 	}
 
-	if (frames.length == 1) {
+	if (frames.length === 1) {
 		frames.push(frames[0]);
 		frameDurations.push(frameDurations[0]);
 	}
-	const gif = await encodeGIF({
-		frames,
-		frameDurations: frameDurations,
-		width: width,
-		height: height,
-	});
 
-	return gif;
+	return encodeGIF({ frames, frameDurations, width, height });
 }
 
 // =====================================================
@@ -233,25 +221,28 @@ function colorize(template, outfit, head, body, legs, feet) {
 	const t = template.image;
 	const o = outfit.image;
 
+	const hv = LOOKUP[head] || 0;
+	const bv = LOOKUP[body] || 0;
+	const lv = LOOKUP[legs] || 0;
+	const fv = LOOKUP[feet] || 0;
+
+	const hr = (hv >> 16) & 0xff, hg = (hv >> 8) & 0xff, hb = hv & 0xff;
+	const br = (bv >> 16) & 0xff, bg = (bv >> 8) & 0xff, bb = bv & 0xff;
+	const lr = (lv >> 16) & 0xff, lg = (lv >> 8) & 0xff, lb = lv & 0xff;
+	const fr = (fv >> 16) & 0xff, fg = (fv >> 8) & 0xff, fb = fv & 0xff;
+
 	for (let i = 0; i < t.length; i += 4) {
 		const rt = t[i];
 		const gt = t[i + 1];
 		const bt = t[i + 2];
 
-		let index = null;
+		let rTarget, gTarget, bTarget;
 
-		if (rt && gt && !bt) index = head;
-		else if (rt && !gt && !bt) index = body;
-		else if (!rt && gt && !bt) index = legs;
-		else if (!rt && !gt && bt) index = feet;
-
-		if (index === null) continue;
-
-		const value = LOOKUP[index] || 0;
-
-		const rTarget = (value >> 16) & 0xff;
-		const gTarget = (value >> 8) & 0xff;
-		const bTarget = value & 0xff;
+		if (rt && gt && !bt) { rTarget = hr; gTarget = hg; bTarget = hb; }
+		else if (rt && !gt && !bt) { rTarget = br; gTarget = bg; bTarget = bb; }
+		else if (!rt && gt && !bt) { rTarget = lr; gTarget = lg; bTarget = lb; }
+		else if (!rt && !gt && bt) { rTarget = fr; gTarget = fg; bTarget = fb; }
+		else continue;
 
 		o[i] = (o[i] * rTarget) / 255;
 		o[i + 1] = (o[i + 1] * gTarget) / 255;
@@ -270,11 +261,18 @@ function alphaOverlay(dest, overlay) {
 		const alpha = o[i + 3];
 		if (alpha === 0) continue;
 
-		const a = alpha / 255;
+		if (alpha === 255) {
+			d[i] = o[i];
+			d[i + 1] = o[i + 1];
+			d[i + 2] = o[i + 2];
+			d[i + 3] = 255;
+			continue;
+		}
 
-		d[i] = o[i] * a + d[i] * (1 - a);
-		d[i + 1] = o[i + 1] * a + d[i + 1] * (1 - a);
-		d[i + 2] = o[i + 2] * a + d[i + 2] * (1 - a);
+		const invAlpha = 255 - alpha;
+		d[i] = (o[i] * alpha + d[i] * invAlpha + 127) / 255 | 0;
+		d[i + 1] = (o[i + 1] * alpha + d[i + 1] * invAlpha + 127) / 255 | 0;
+		d[i + 2] = (o[i + 2] * alpha + d[i + 2] * invAlpha + 127) / 255 | 0;
 		d[i + 3] = 255;
 	}
 }
