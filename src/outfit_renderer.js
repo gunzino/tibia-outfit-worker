@@ -138,20 +138,21 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 	const frameDuration = SPEEDS[frameCount];
 	const framePromises = [];
 	const frameDurations = [];
+	const frameOpts = { ...options };
 
 	if (options.rotate) {
 		for (let d = 1; d <= 4; d++) {
 			for (let f = 1; f <= frameCount; f++) {
-				options.direction = d;
-				options.animation = f;
-				framePromises.push(renderFrame(options, outfitPack, mountPack));
+				frameOpts.direction = d;
+				frameOpts.animation = f;
+				framePromises.push(renderFrame(frameOpts, outfitPack, mountPack));
 				frameDurations.push(frameDuration);
 			}
 		}
 	} else {
 		for (let f = 1; f <= frameCount; f++) {
-			options.animation = f;
-			framePromises.push(renderFrame(options, outfitPack, mountPack));
+			frameOpts.animation = f;
+			framePromises.push(renderFrame(frameOpts, outfitPack, mountPack));
 			frameDurations.push(frameDuration);
 		}
 	}
