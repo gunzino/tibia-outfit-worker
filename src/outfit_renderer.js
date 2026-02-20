@@ -172,6 +172,10 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 		frames.push(frame.image)
 	}
 
+	if (frames.length == 1) {
+		frames.push(frames[0]);
+		frameDurations.push(frameDurations[0]);
+	}
 	const gif = await encodeGIF({
 		frames,
 		frameDurations: frameDurations,
