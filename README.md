@@ -47,7 +47,7 @@ The Worker fetches and parses the TAR file, minimizing network overhead.
 
 ### Animated Outfit
 
-/animate/{id}?head=45&body=80&legs=90&feet=120&addons=3&rotate=0&mount=1778
+/animate/{id}?head=45&body=80&legs=90&feet=120&addons=3&rotate=0&mount=1778&walk=1
 
 ------------------------------------------------------------------------
 
@@ -66,8 +66,9 @@ Param         Description
 `addons`      0--3  
 `mount`       Mount ID  
 `direction`   1--4  
-`animation`   Frame index (for static images)  
+`animation`   Frame index (for static images, default 1)  
 `rotate`      0 or 1  
+`walk`        0 or 1 (animated outfits only)  
 
 ------------------------------------------------------------------------
 
