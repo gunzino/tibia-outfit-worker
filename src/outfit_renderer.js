@@ -66,29 +66,22 @@ export async function renderFrame(options, outfitPack, mountPack) {
 	const mountId = mount & 0xffff;
 	const mountState = mountId > 0 ? 2 : 1;
 
-	const base = await loadPNGFromTar(
-		outfitPack,
-		`${walk}_${animation}_${mountState}_1_${direction}.png`
-	);
+	const prefix = `${walk}_${animation}_${mountState}_1_${direction}`;
+	const [base, template] = await Promise.all([
+		loadPNGFromTar(outfitPack, `${prefix}.png`),
+		loadPNGFromTar(outfitPack, `${prefix}_template.png`),
+	]);
 
 	if (!base) {
-		throw new Error(
-			`Outfit base image not found: ${walk}_${animation}_${mountState}_1_${direction}.png`
-		);
+		throw new Error(`Outfit base image not found: ${prefix}.png`);
 	}
 
-	// TEMPLATE OPTIONAL
-	const template = await loadPNGFromTar(
-		outfitPack,
-		`${walk}_${animation}_${mountState}_1_${direction}_template.png`
-	);
-
 	// Apply addons
-	if (addons === 1 || addons === 3) {
+	if (addons & 1) {
 		await applyAddon(outfitPack, id, walk, animation, mountState, 2, direction, base, template);
 	}
 
-	if (addons === 2 || addons === 3) {
+	if (addons & 2) {
 		await applyAddon(outfitPack, id, walk, animation, mountState, 3, direction, base, template);
 	}
 
@@ -197,22 +190,14 @@ async function loadMetadataFromTar(pack) {
 // APPLY ADDON
 // =====================================================
 async function applyAddon(outfitPack, id, walk, animation, mountState, addonId, direction, base, template) {
-	const addon = await loadPNGFromTar(
-		outfitPack,
-		`${walk}_${animation}_${mountState}_${addonId}_${direction}.png`
-	);
+	const prefix = `${walk}_${animation}_${mountState}_${addonId}_${direction}`;
+	const [addon, addonTemplate] = await Promise.all([
+		loadPNGFromTar(outfitPack, `${prefix}.png`),
+		template ? loadPNGFromTar(outfitPack, `${prefix}_template.png`) : null,
+	]);
 
 	if (addon) alphaOverlay(base, addon);
-
-	// Only apply template overlay if template exists
-	if (template) {
-		const addonTemplate = await loadPNGFromTar(
-			outfitPack,
-			`${walk}_${animation}_${mountState}_${addonId}_${direction}_template.png`
-		);
-
-		if (addonTemplate) alphaOverlay(template, addonTemplate);
-	}
+	if (template && addonTemplate) alphaOverlay(template, addonTemplate);
 }
 
 // =====================================================
