@@ -85,11 +85,11 @@ export async function renderFrame(options, outfitPack, mountPack) {
 
 	// Apply addons
 	if (addons === 1 || addons === 3) {
-		await applyAddon(outfitPack, id, animation, mountState, 2, direction, base, template);
+		await applyAddon(outfitPack, id, walk, animation, mountState, 2, direction, base, template);
 	}
 
 	if (addons === 2 || addons === 3) {
-		await applyAddon(outfitPack, id, animation, mountState, 3, direction, base, template);
+		await applyAddon(outfitPack, id, walk, animation, mountState, 3, direction, base, template);
 	}
 
 	// Colorize only if template exists
@@ -207,10 +207,10 @@ async function loadMetadataFromTar(pack) {
 // =====================================================
 // APPLY ADDON
 // =====================================================
-async function applyAddon(outfitPack, id, animation, mountState, addonId, direction, base, template) {
+async function applyAddon(outfitPack, id, walk, animation, mountState, addonId, direction, base, template) {
 	const addon = await loadPNGFromTar(
 		outfitPack,
-		`${animation}_${mountState}_${addonId}_${direction}.png`
+		`${walk}_${animation}_${mountState}_${addonId}_${direction}.png`
 	);
 
 	if (addon) alphaOverlay(base, addon);
@@ -219,7 +219,7 @@ async function applyAddon(outfitPack, id, animation, mountState, addonId, direct
 	if (template) {
 		const addonTemplate = await loadPNGFromTar(
 			outfitPack,
-			`${animation}_${mountState}_${addonId}_${direction}_template.png`
+			`${walk}_${animation}_${mountState}_${addonId}_${direction}_template.png`
 		);
 
 		if (addonTemplate) alphaOverlay(template, addonTemplate);
