@@ -151,13 +151,13 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 	}
 
 	const resolvedFrames = await Promise.all(framePromises);
-	const frames = new Array(resolvedFrames.length);
+	const frames = [];
 	let width = 32;
 	let height = 32;
-	for (let i = 0; i < resolvedFrames.length; i++) {
-		width = resolvedFrames[i].width;
-		height = resolvedFrames[i].height;
-		frames[i] = resolvedFrames[i].image;
+	for (let frame of resolvedFrames) {
+		width = frame.width;
+		height = frame.height;
+		frames.push(frame.image);
 	}
 
 	if (frames.length === 1) {
@@ -165,7 +165,12 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 		frameDurations.push(frameDurations[0]);
 	}
 
-	return encodeGIF({ frames, frameDurations, width, height });
+	return encodeGIF({
+		frames: frames,
+		frameDurations: frameDurations,
+		width: width,
+		height: height,
+	});
 }
 
 // =====================================================
