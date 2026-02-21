@@ -39,22 +39,9 @@ export function getParams(url) {
 	if (!id) return null;
 
 	return {
-		id: id,
-		addons: addons,
-		head: head,
-		body: body,
-		legs: legs,
-		feet: feet,
-		mounthead: mounthead,
-		mountbody: mountbody,
-		mountlegs: mountlegs,
-		mountfeet: mountfeet,
-		mount: mount,
-		direction: direction,
-		animation: animation,
-		rotate: rotate,
-		animate: animate,
-		walk: walk
+		id, addons, head, body, legs, feet,
+		mounthead, mountbody, mountlegs, mountfeet,
+		mount, direction, animation, rotate, animate, walk,
 	}
 }
 

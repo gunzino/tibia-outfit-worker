@@ -8,26 +8,17 @@ export function parseTar(buffer) {
 	let offset = 0;
 
 	while (offset + 512 <= bytes.length) {
-		const header = bytes.subarray(offset, offset + 512);
-
-		// If header is all zero → end of archive
-		let empty = true;
-		for (let i = 0; i < 512; i++) {
-			if (header[i] !== 0) {
-				empty = false;
-				break;
-			}
-		}
-		if (empty) break;
+		// If first byte is zero → empty header → end of archive
+		if (bytes[offset] === 0) break;
 
 		// File name (first 100 bytes)
 		const name = decoder
-			.decode(header.subarray(0, 100))
+			.decode(bytes.subarray(offset, offset + 100))
 			.replace(/\0.*$/, "");
 
 		// File size (octal string at bytes 124–135)
 		const sizeOctal = decoder
-			.decode(header.subarray(124, 136))
+			.decode(bytes.subarray(offset + 124, offset + 136))
 			.replace(/\0.*$/, "")
 			.trim();
 
@@ -40,12 +31,10 @@ export function parseTar(buffer) {
 			throw new Error("Invalid TAR: file exceeds archive size");
 		}
 
-		const fileData = bytes.subarray(fileStart, fileEnd);
-
-		files.set(name, fileData);
+		files.set(name, bytes.subarray(fileStart, fileEnd));
 
 		// Move to next 512-aligned block
-		offset = fileStart + Math.ceil(size / 512) * 512;
+		offset = fileStart + ((size + 511) & ~511);
 	}
 
 	return files;

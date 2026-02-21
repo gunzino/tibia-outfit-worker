@@ -38,36 +38,14 @@ async function getTarPack(env, id) {
 	return parsed;
 }
 
-function buildCacheKey(request, params) {
-	const url = new URL(request.url);
-
-	const keyString = [
-		"v4", // renderer version (bump when logic changes)
-		params.id,
-		params.walk,
-		params.addons,
-		params.head,
-		params.body,
-		params.legs,
-		params.feet,
-		params.mounthead,
-		params.mountbody,
-		params.mountlegs,
-		params.mountfeet,
-		params.mount,
-		params.direction,
-		params.animation,
-		params.rotate ? 1 : 0,
-		params.animate ? 1 : 0
-	].join("_");
+function buildCacheKey(url, params) {
+	// v4 = renderer version (bump when logic changes)
+	const keyString = `v4_${params.id}_${params.walk}_${params.addons}_${params.head}_${params.body}_${params.legs}_${params.feet}_${params.mounthead}_${params.mountbody}_${params.mountlegs}_${params.mountfeet}_${params.mount}_${params.direction}_${params.animation}_${params.rotate ? 1 : 0}_${params.animate ? 1 : 0}`;
 
 	const cacheUrl = `${url.origin}/_outfit_cache/${keyString}`;
 
 	return new Request(cacheUrl, {
 		method: "GET",
-		headers: {
-			"Accept": request.headers.get("Accept") || "*/*"
-		}
 	});
 }
 
@@ -110,25 +88,24 @@ export default {
 		}
 
 		const cache = caches.default;
-		const cacheKey = buildCacheKey(request, params);
+		const cacheKey = buildCacheKey(url, params);
 
 		const cached = await cache.match(cacheKey);
 		if (cached) {
 			return cached;
 		}
 
-		let outfitPack = await getTarPack(env, params.id);
+		const [outfitPack, mountPack] = await Promise.all([
+			getTarPack(env, params.id),
+			params.mount ? getTarPack(env, params.mount) : null,
+		]);
 
 		if (!outfitPack) {
 			return new Response("Outfit not found", { status: 400 })
 		}
 
-		let mountPack = null;
-		if (params.mount) {
-			mountPack = await getTarPack(env, params.mount);
-			if (!mountPack) {
-				return new Response("Mount not found", { status: 400 })
-			}
+		if (params.mount && !mountPack) {
+			return new Response("Mount not found", { status: 400 })
 		}
 
 		let response = null;
@@ -159,6 +136,6 @@ export default {
 			return response;
 		}
 
-		return new Response('Somthing strange happened', { status: 400 });
+		return new Response('Something strange happened', { status: 400 });
 	},
 };
