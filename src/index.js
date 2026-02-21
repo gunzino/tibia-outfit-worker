@@ -48,9 +48,6 @@ function buildCacheKey(url, request, params) {
 
 	return new Request(cacheUrl, {
 		method: "GET",
-		headers: {
-			"Accept": request.headers.get("Accept") || "*/*"
-		}
 	});
 }
 
@@ -100,18 +97,17 @@ export default {
 			return cached;
 		}
 
-		let outfitPack = await getTarPack(env, params.id);
+		const [outfitPack, mountPack] = await Promise.all([
+			getTarPack(env, params.id),
+			params.mount ? getTarPack(env, params.mount) : null,
+		]);
 
 		if (!outfitPack) {
 			return new Response("Outfit not found", { status: 400 })
 		}
 
-		let mountPack = null;
-		if (params.mount) {
-			mountPack = await getTarPack(env, params.mount);
-			if (!mountPack) {
-				return new Response("Mount not found", { status: 400 })
-			}
+		if (params.mount && !mountPack) {
+			return new Response("Mount not found", { status: 400 })
 		}
 
 		let response = null;
