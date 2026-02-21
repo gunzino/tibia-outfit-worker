@@ -10,7 +10,7 @@
 
 
 import { getParams } from './get_params';
-import {createColorizedOutfit, createAnimatedGIF} from './outfit_renderer';
+import {createColorizedOutfit, createAnimatedGIF, createAnimatedWebP} from './outfit_renderer';
 import {parseTar} from './tar';
 
 const tarCache = new Map();
@@ -38,28 +38,11 @@ async function getTarPack(env, id) {
 	return parsed;
 }
 
-function buildCacheKey(request, params) {
-	const url = new URL(request.url);
-
-	const keyString = [
-		"v4", // renderer version (bump when logic changes)
-		params.id,
-		params.walk,
-		params.addons,
-		params.head,
-		params.body,
-		params.legs,
-		params.feet,
-		params.mounthead,
-		params.mountbody,
-		params.mountlegs,
-		params.mountfeet,
-		params.mount,
-		params.direction,
-		params.animation,
-		params.rotate ? 1 : 0,
-		params.animate ? 1 : 0
-	].join("_");
+function buildCacheKey(url, request, params) {
+	const accept = request.headers.get("Accept") || "";
+	const format = params.animate && accept.includes("image/webp") ? "webp" : "default";
+	// v5 = renderer version (bump when logic changes)
+	const keyString = `v5_${format}_${params.id}_${params.walk}_${params.addons}_${params.head}_${params.body}_${params.legs}_${params.feet}_${params.mounthead}_${params.mountbody}_${params.mountlegs}_${params.mountfeet}_${params.mount}_${params.direction}_${params.animation}_${params.rotate ? 1 : 0}_${params.animate ? 1 : 0}`;
 
 	const cacheUrl = `${url.origin}/_outfit_cache/${keyString}`;
 
@@ -110,7 +93,7 @@ export default {
 		}
 
 		const cache = caches.default;
-		const cacheKey = buildCacheKey(request, params);
+		const cacheKey = buildCacheKey(url, request, params);
 
 		const cached = await cache.match(cacheKey);
 		if (cached) {
@@ -143,11 +126,22 @@ export default {
 				})
 			}
 		} else {
-			const image = await createAnimatedGIF(params, outfitPack, mountPack);
+			const accept = request.headers.get("Accept") || "";
+			const useWebP = accept.includes("image/webp");
+
+			let image, contentType;
+			if (useWebP) {
+				image = await createAnimatedWebP(params, outfitPack, mountPack);
+				contentType = "image/webp";
+			} else {
+				image = await createAnimatedGIF(params, outfitPack, mountPack);
+				contentType = "image/gif";
+			}
+
 			if (image) {
 				response = new Response(image, {
 					headers: {
-						"Content-Type": "image/gif",
+						"Content-Type": contentType,
 						"Cache-Control": "public, max-age=2592000, immutable"
 					}
 				})
@@ -159,6 +153,6 @@ export default {
 			return response;
 		}
 
-		return new Response('Somthing strange happened', { status: 400 });
+		return new Response('Something strange happened', { status: 400 });
 	},
 };
