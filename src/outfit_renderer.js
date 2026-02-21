@@ -1,5 +1,6 @@
 import { decode, encode } from "@cf-wasm/png/workerd";
 import { encode as encodeGIF } from 'gifski-wasm/cloudflare';
+import { encodeAnimatedWebP } from './webp_encoder';
 
 // =====================================================
 // LOOKUP TABLE (FULL)
@@ -132,7 +133,7 @@ export async function createColorizedOutfit(options, outfitPack, mountPack) {
 	return encodePNG(image);
 }
 
-export async function createAnimatedGIF(options, outfitPack, mountPack) {
+async function renderAllFrames(options, outfitPack, mountPack) {
 	const outfitMetadata = await loadMetadataFromTar(outfitPack);
 	if (!outfitMetadata) {
 		throw new Error("Specific outfit dos not have metadata")
@@ -176,14 +177,18 @@ export async function createAnimatedGIF(options, outfitPack, mountPack) {
 		frames.push(frames[0]);
 		frameDurations.push(frameDurations[0]);
 	}
-	const gif = await encodeGIF({
-		frames,
-		frameDurations: frameDurations,
-		width: width,
-		height: height,
-	});
 
-	return gif;
+	return { frames, frameDurations, width, height };
+}
+
+export async function createAnimatedGIF(options, outfitPack, mountPack) {
+	const data = await renderAllFrames(options, outfitPack, mountPack);
+	return encodeGIF(data);
+}
+
+export async function createAnimatedWebP(options, outfitPack, mountPack) {
+	const data = await renderAllFrames(options, outfitPack, mountPack);
+	return encodeAnimatedWebP(data);
 }
 
 // =====================================================

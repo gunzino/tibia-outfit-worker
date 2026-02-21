@@ -15,6 +15,7 @@
 	},
 	"dependencies": {
 		"@cf-wasm/png": "^0.3.2",
-		"gifski-wasm": "^2.2.0"
+		"gifski-wasm": "^2.2.0",
+		"webpxmux": "^0.0.2"
 	}
 }
