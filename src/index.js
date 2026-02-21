@@ -142,7 +142,8 @@ export default {
 				response = new Response(image, {
 					headers: {
 						"Content-Type": contentType,
-						"Cache-Control": "public, max-age=2592000, immutable"
+						"Cache-Control": "public, max-age=2592000, immutable",
+						"Vary": "Accept"
 					}
 				})
 			}
