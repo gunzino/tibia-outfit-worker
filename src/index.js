@@ -38,7 +38,7 @@ async function getTarPack(env, id) {
 	return parsed;
 }
 
-function buildCacheKey(url, request, params) {
+function buildCacheKey(url, params) {
 	// v4 = renderer version (bump when logic changes)
 	const keyString = `v4_${params.id}_${params.walk}_${params.addons}_${params.head}_${params.body}_${params.legs}_${params.feet}_${params.mounthead}_${params.mountbody}_${params.mountlegs}_${params.mountfeet}_${params.mount}_${params.direction}_${params.animation}_${params.rotate ? 1 : 0}_${params.animate ? 1 : 0}`;
 
@@ -46,9 +46,6 @@ function buildCacheKey(url, request, params) {
 
 	return new Request(cacheUrl, {
 		method: "GET",
-		headers: {
-			"Accept": request.headers.get("Accept") || "*/*"
-		}
 	});
 }
 
@@ -91,7 +88,7 @@ export default {
 		}
 
 		const cache = caches.default;
-		const cacheKey = buildCacheKey(url, request, params);
+		const cacheKey = buildCacheKey(url, params);
 
 		const cached = await cache.match(cacheKey);
 		if (cached) {
